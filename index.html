@@ -80,7 +80,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: 8px;
+      gap: 7px;
       padding: max(env(safe-area-inset-top, 12px), 12px) 12px max(env(safe-area-inset-bottom, 12px), 12px);
     }
 
@@ -94,7 +94,7 @@
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border-radius: 18px;
-      padding: 9px 11px;
+      padding: 8px 11px;
       flex-shrink: 0;
     }
 
@@ -163,6 +163,47 @@
       transform: scale(0.97);
     }
 
+    /* Canlı Bildirim & 90 Gün Widget Şeridi */
+    .status-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(255, 126, 179, 0.14);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    body.theme-emre .status-banner {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .status-banner.warning {
+      background: rgba(244, 63, 94, 0.18);
+      border-color: rgba(244, 63, 94, 0.45);
+      color: #fecdd3;
+    }
+
+    .status-banner.ok {
+      background: rgba(52, 211, 153, 0.16);
+      border-color: rgba(52, 211, 153, 0.4);
+      color: #a7f3d0;
+    }
+
+    .day-counter-pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
     .garden-stage {
       flex: 1;
       min-height: 0;
@@ -174,7 +215,7 @@
       background: var(--stage-bg);
       border-radius: 24px;
       border: 1px solid var(--stage-border);
-      padding: 10px 12px;
+      padding: 9px 12px;
     }
 
     .stage-header {
@@ -203,7 +244,7 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.1);
       overflow: hidden;
-      margin: 6px auto 2px;
+      margin: 5px auto 2px;
     }
 
     .progress-fill {
@@ -225,12 +266,12 @@
       width: 100%;
       max-width: 300px;
       flex: 1;
-      min-height: 140px;
+      min-height: 130px;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px 14px;
-      margin: 4px 0;
+      padding: 12px 14px;
+      margin: 3px 0;
       border-radius: 20px;
       background: rgba(255, 255, 255, 0.02);
     }
@@ -363,9 +404,9 @@
       -webkit-backdrop-filter: blur(14px);
       border-radius: 20px;
       padding: 8px 12px;
-      height: 22%;
-      min-height: 110px;
-      max-height: 155px;
+      height: 21%;
+      min-height: 105px;
+      max-height: 150px;
       display: flex;
       flex-direction: column;
       gap: 5px;
@@ -574,19 +615,26 @@
         <span class="room-title" id="headerTitle">Aleyna · ÇİÇEK-2026</span>
       </div>
       <div class="top-actions">
+        <button type="button" class="btn-small" id="notifyBtn" aria-label="Bildirim İzni">🔔</button>
         <button type="button" class="btn-small" id="toggleMusicBtn" aria-label="Müzik">🎵</button>
         <button type="button" class="btn-small" id="openRoomBtn">Kişi / Oda</button>
       </div>
     </div>
 
+    <!-- Canlı Sulama Durumu & 90 Gün Sayacı -->
+    <div class="status-banner warning" id="statusBanner">
+      <span id="statusMessage">🥀 Bugün beni sulamadınız!</span>
+      <span class="day-counter-pill" id="dayCounterBadge">0 / 90 Gün</span>
+    </div>
+
     <div class="garden-stage">
       <div class="stage-header">
         <h1 class="stage-name" id="stageTitle">Sadece Toprak</h1>
-        <p class="stage-sub" id="stageDesc">Toprak henüz uyanıyor. Suladıkça 90 günde çiçek açacak.</p>
+        <p class="stage-sub" id="stageDesc">İlk sulamayı yaptığınız an 90 günlük büyüme sayacı başlar.</p>
         <div class="progress-wrap">
           <div class="progress-fill" id="growthBar"></div>
         </div>
-        <div class="progress-label" id="growthLabel">0. Gün · Büyüme %0 (Hedef 90 Gün)</div>
+        <div class="progress-label" id="growthLabel">İlk sulama bekleniyor · Hedef 90 Gün</div>
       </div>
 
       <div class="visual-wrap">
@@ -649,7 +697,6 @@ const DAILY_WATER_LIMIT = 1;
 
 const RAW_BASE_URL = "https://raw.githubusercontent.com/emreakyavuz/sakayik-bahcesi/refs/heads/main";
 
-// Kişiye özel arka plan şarkısı bağlantıları
 const MUSIC_TRACKS = {
   Aleyna: `${RAW_BASE_URL}/aleyna.mp3`,
   Emre: `${RAW_BASE_URL}/emre.mp3`
@@ -675,13 +722,12 @@ const state = {
   userName: "Aleyna",
   pendingName: "Aleyna",
   roomCode: "ÇİÇEK-2026",
-  plantedAt: null,
+  firstWateredAt: null, // İlk sulama yapıldığı an 90 gün sayacı başlar
   lastResetAt: 0,
   waterLogs: [],
   lastWateredAt: null
 };
 
-// Dinamik PWA Manifest oluşturucu (Ana Ekrana Ekle / Widget deneyimi için)
 (function injectManifest() {
   try {
     const manifest = {
@@ -691,13 +737,7 @@ const state = {
       display: "standalone",
       background_color: "#100b1f",
       theme_color: "#100b1f",
-      icons: [
-        {
-          src: "./icon.png",
-          sizes: "512x512",
-          type: "image/png"
-        }
-      ]
+      icons: [{ src: "./icon.png", sizes: "512x512", type: "image/png" }]
     };
     const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -745,6 +785,18 @@ document.getElementById("toggleMusicBtn").onclick = () => {
     bgAudio.pause();
   } else {
     playUserMusic(state.userName, false);
+  }
+};
+
+document.getElementById("notifyBtn").onclick = async () => {
+  if (!("Notification" in window)) {
+    alert("Bu tarayıcı bildirimleri desteklemiyor. iOS Ana Ekran Widget'ı için Scriptable kullanabilirsiniz.");
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if (perm === "granted") {
+    const info = getDailyWateringStatus();
+    new Notification("🌸 Şakayık Bahçesi", { body: `${info.message} (${info.dayText})` });
   }
 };
 
@@ -827,13 +879,58 @@ function getTodayWaterCountForUser(userName) {
   }).length;
 }
 
+function getDailyWateringStatus() {
+  const aleynaWatered = getTodayWaterCountForUser("Aleyna") > 0;
+  const emreWatered = getTodayWaterCountForUser("Emre") > 0;
+
+  let message = "";
+  let statusType = "warning";
+
+  if (!aleynaWatered && !emreWatered) {
+    message = "🥀 Bugün beni sulamadınız!";
+  } else if (!aleynaWatered) {
+    message = "💧 Aleyna bugün sulamadı";
+  } else if (!emreWatered) {
+    message = "💧 Emre bugün sulamadı";
+  } else {
+    message = "🌸 Bugün ikiniz de suladınız!";
+    statusType = "ok";
+  }
+
+  let currentDay = 0;
+  if (state.firstWateredAt) {
+    const diffDays = Math.floor((Date.now() - state.firstWateredAt) / (24 * 60 * 60 * 1000)) + 1;
+    currentDay = Math.min(FULL_BLOOM_DAYS, Math.max(1, diffDays));
+  }
+
+  const dayText = state.firstWateredAt
+    ? `${currentDay} / ${FULL_BLOOM_DAYS} Gün`
+    : `0 / ${FULL_BLOOM_DAYS} Gün`;
+
+  return { aleynaWatered, emreWatered, message, statusType, currentDay, dayText };
+}
+
+function checkAndSendDailyReminder() {
+  if (!("Notification" in window) || Notification.permission !== "granted") return;
+  const info = getDailyWateringStatus();
+  if (info.statusType === "ok") return;
+
+  const sentKey = `reminded_${state.roomCode}_${dayKey()}_${info.message}`;
+  if (!localStorage.getItem(sentKey)) {
+    localStorage.setItem(sentKey, "1");
+    new Notification(`🌸 Şakayık Bahçesi (${info.dayText})`, {
+      body: info.message
+    });
+  }
+}
+
 function loadLocal() {
   try {
     const raw = localStorage.getItem(storageKey());
     if (!raw) return;
     const data = JSON.parse(raw);
     if (typeof data.lastResetAt === "number") state.lastResetAt = data.lastResetAt;
-    if (typeof data.plantedAt === "number") state.plantedAt = data.plantedAt;
+    if (typeof data.firstWateredAt === "number") state.firstWateredAt = data.firstWateredAt;
     if (typeof data.lastWateredAt === "number") state.lastWateredAt = data.lastWateredAt;
     state.waterLogs = pruneExpiredLogs(data.waterLogs || []);
   } catch (e) {}
@@ -842,7 +939,7 @@ function loadLocal() {
 function saveLocal() {
   try {
     localStorage.setItem(storageKey(), JSON.stringify({
-      plantedAt: state.plantedAt,
+      firstWateredAt: state.firstWateredAt,
       lastResetAt: state.lastResetAt,
       lastWateredAt: state.lastWateredAt,
       waterLogs: state.waterLogs
@@ -851,8 +948,9 @@ function saveLocal() {
 }
 
 function computeGrowthProgress() {
-  const elapsedDays = state.plantedAt
-    ? Math.max(0, (Date.now() - state.plantedAt) / (24 * 60 * 60 * 1000))
+  // İlk sulama yapılmadan gün sayacı 0'da kalır
+  const elapsedDays = state.firstWateredAt
+    ? Math.max(0, (Date.now() - state.firstWateredAt) / (24 * 60 * 60 * 1000))
     : 0;
 
   const waterCount = pruneExpiredLogs(state.waterLogs).filter(
@@ -860,15 +958,22 @@ function computeGrowthProgress() {
   ).length;
 
   const careDays = waterCount * WATER_BONUS_DAYS;
-  const effectiveDays = Math.min(FULL_BLOOM_DAYS, elapsedDays + careDays);
+  const effectiveDays = state.firstWateredAt
+    ? Math.min(FULL_BLOOM_DAYS, elapsedDays + careDays)
+    : 0;
+
   const ratio = Math.max(0, Math.min(1, effectiveDays / FULL_BLOOM_DAYS));
   const percent = Math.round(ratio * 100);
 
   const stepIdx = Math.min(PEONY_STAGES.length - 1, Math.floor(ratio * PEONY_STAGES.length));
   const stageObj = PEONY_STAGES[stepIdx] || PEONY_STAGES[0];
 
+  const currentDay = state.firstWateredAt
+    ? Math.min(FULL_BLOOM_DAYS, Math.floor(elapsedDays) + 1)
+    : 0;
+
   return {
-    daysElapsed: Math.floor(elapsedDays),
+    currentDay,
     ratio,
     percent,
     stepIdx,
@@ -878,6 +983,16 @@ function computeGrowthProgress() {
 
 function renderGarden() {
   const g = computeGrowthProgress();
+  const statusInfo = getDailyWateringStatus();
+
+  const bannerEl = document.getElementById("statusBanner");
+  const msgEl = document.getElementById("statusMessage");
+  const dayBadgeEl = document.getElementById("dayCounterBadge");
+
+  bannerEl.className = `status-banner ${statusInfo.statusType}`;
+  msgEl.textContent = statusInfo.message;
+  dayBadgeEl.textContent = statusInfo.dayText;
+
   const titleEl = document.getElementById("stageTitle");
   const descEl = document.getElementById("stageDesc");
   const barEl = document.getElementById("growthBar");
@@ -885,9 +1000,14 @@ function renderGarden() {
   const imgEl = document.getElementById("peonyImg");
 
   titleEl.textContent = g.stageObj.title;
-  descEl.textContent = g.stageObj.desc;
+  descEl.textContent = state.firstWateredAt
+    ? g.stageObj.desc
+    : "İlk sulama yapıldığı an 90 günlük büyüme sayacı başlayacak.";
+
   barEl.style.width = `${g.percent}%`;
-  labelEl.textContent = `${g.daysElapsed}. Gün · Büyüme %${g.percent} (Hedef ${FULL_BLOOM_DAYS} Gün)`;
+  labelEl.textContent = state.firstWateredAt
+    ? `${g.currentDay}. Gün / ${FULL_BLOOM_DAYS} Gün · Büyüme %${g.percent}`
+    : `0 / ${FULL_BLOOM_DAYS} Gün · İlk sulama bekleniyor`;
 
   const targetSrc = `${RAW_BASE_URL}/${g.stageObj.file}`;
   if (imgEl.getAttribute("src") !== targetSrc) {
@@ -902,6 +1022,8 @@ function renderGarden() {
   quotaEl.textContent = `Hak: ${leftToday}/${DAILY_WATER_LIMIT}`;
   waterBtn.disabled = leftToday <= 0;
   waterBtn.textContent = leftToday > 0 ? "Çiçeği Sula 💧" : "Bugün Sulandı";
+
+  checkAndSendDailyReminder();
 }
 
 function renderLogs() {
@@ -958,15 +1080,22 @@ async function pushFlowerStateToFirebase(newLogItem = null) {
   if (!FIREBASE_URL) return;
   const base = FIREBASE_URL.replace(/\/+$/, "");
   const room = encodeURIComponent(state.roomCode);
+  const statusInfo = getDailyWateringStatus();
 
   try {
     await fetch(`${base}/rooms/${room}/flower/meta.json`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        plantedAt: state.plantedAt,
+        firstWateredAt: state.firstWateredAt,
         lastResetAt: state.lastResetAt || 0,
         lastWateredAt: state.lastWateredAt,
+        todayKey: dayKey(),
+        aleynaWateredToday: statusInfo.aleynaWatered,
+        emreWateredToday: statusInfo.emreWatered,
+        statusMessage: statusInfo.message,
+        currentDay: statusInfo.currentDay,
+        totalDays: FULL_BLOOM_DAYS,
         updatedAt: Date.now()
       })
     });
@@ -991,19 +1120,21 @@ async function pollFlowerFirebase() {
     const data = await res.json();
 
     if (!data) {
-      if (state.plantedAt) pushFlowerStateToFirebase(null);
+      if (state.firstWateredAt) pushFlowerStateToFirebase(null);
       return;
     }
 
     if (data.meta) {
       if (typeof data.meta.lastResetAt === "number" && data.meta.lastResetAt > (state.lastResetAt || 0)) {
         state.lastResetAt = data.meta.lastResetAt;
-        state.plantedAt = typeof data.meta.plantedAt === "number" ? data.meta.plantedAt : data.meta.lastResetAt;
+        state.firstWateredAt = typeof data.meta.firstWateredAt === "number" ? data.meta.firstWateredAt : null;
         state.lastWateredAt = null;
         state.waterLogs = [];
-      } else if (typeof data.meta.plantedAt === "number") {
-        if (!state.plantedAt || data.meta.plantedAt > state.plantedAt) {
-          state.plantedAt = data.meta.plantedAt;
+      } else {
+        if (typeof data.meta.firstWateredAt === "number") {
+          if (!state.firstWateredAt || data.meta.firstWateredAt < state.firstWateredAt) {
+            state.firstWateredAt = data.meta.firstWateredAt;
+          }
         }
         if (typeof data.meta.lastWateredAt === "number") {
           state.lastWateredAt = Math.max(state.lastWateredAt || 0, data.meta.lastWateredAt);
@@ -1062,7 +1193,10 @@ document.getElementById("waterBtn").onclick = async () => {
   }
 
   const now = Date.now();
-  if (!state.plantedAt) state.plantedAt = now;
+  // İlk sulama yapıldığı anda 90 gün sayacı başlar
+  if (!state.firstWateredAt) {
+    state.firstWateredAt = now;
+  }
   state.lastWateredAt = now;
 
   const timeStr = formatTimeHHMM(now);
@@ -1091,7 +1225,6 @@ document.getElementById("sendFlowerNoteBtn").onclick = async () => {
 
   const actor = state.userName;
   const now = Date.now();
-  if (!state.plantedAt) state.plantedAt = now;
 
   const timeStr = formatTimeHHMM(now);
   const noteItem = {
@@ -1152,7 +1285,6 @@ document.getElementById("saveRoomBtn").onclick = () => {
   document.getElementById("roomModal").classList.remove("open");
 
   loadLocal();
-  if (!state.plantedAt) state.plantedAt = Date.now();
   renderGarden();
   renderLogs();
   pollFlowerFirebase();
@@ -1162,7 +1294,6 @@ syncMusicButtonUI();
 applyThemeForUser(state.userName);
 syncNameButtonsUI();
 loadLocal();
-if (!state.plantedAt) state.plantedAt = Date.now();
 document.getElementById("headerTitle").textContent = `${state.userName} · ${state.roomCode}`;
 renderGarden();
 renderLogs();
