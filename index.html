@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#100b1f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Şakayık Bahçesi" />
+  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/emreakyavuz/sakayik-bahcesi/refs/heads/main/7.PNG" />
+  <title>Aleynamın Çiçek Bahçesi</title>
+  <style>
+    :root {
+      --bg-top: #100b1f;
+      --bg-mid: #1b1333;
+      --bg-bottom: #0a0714;
+      --card: rgba(24, 17, 44, 0.88);
+      --card-solid: #19112e;
+      --stage-bg: radial-gradient(circle at 50% 56%, rgba(255, 126, 179, 0.08), transparent 65%);
+      --stage-border: rgba(255, 158, 198, 0.16);
+      --border: rgba(255, 158, 198, 0.28);
+      --accent-soft: #ffd6e7;
+      --accent-mid: #ff7eb3;
+      --accent-deep: #c92a6d;
+      --gold: #ffd166;
+      --water: #38bdf8;
+      --text: #fff9fc;
+      --muted: #cfc2d8;
+    }
+
+    body.theme-emre {
+      --bg-top: #070709;
+      --bg-mid: #101014;
+      --bg-bottom: #040406;
+      --card: rgba(16, 16, 20, 0.9);
+      --card-solid: #121216;
+      --stage-bg: radial-gradient(circle at 50% 56%, rgba(255, 255, 255, 0.06), transparent 65%);
+      --stage-border: rgba(255, 255, 255, 0.14);
+      --border: rgba(255, 255, 255, 0.2);
+      --accent-soft: #f4f4f5;
+      --accent-mid: #a1a1aa;
+      --accent-deep: #27272a;
+      --gold: #e4e4e7;
+      --text: #fafafa;
+      --muted: #a1a1aa;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      position: fixed;
+      inset: 0;
+      overscroll-behavior: none;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 22%, rgba(255, 126, 179, 0.14) 0%, transparent 52%),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 55%, var(--bg-bottom) 100%);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body.theme-emre {
+      background:
+        radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.06) 0%, transparent 52%),
+        linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 55%, var(--bg-bottom) 100%);
+    }
+
+    .app-shell {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      padding: max(env(safe-area-inset-top, 12px), 12px) 12px max(env(safe-area-inset-bottom, 12px), 12px);
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 18px;
+      padding: 9px 11px;
+      flex-shrink: 0;
+    }
+
+    .room-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 126, 179, 0.18);
+      border: 1px solid var(--border);
+      color: var(--accent-soft);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    body.theme-emre .pill {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .room-title {
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .btn-small {
+      min-height: 34px;
+      padding: 6px 9px;
+      border-radius: 11px;
+      border: 1px solid var(--border);
+      background: rgba(255, 126, 179, 0.2);
+      color: var(--text);
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      touch-action: manipulation;
+      white-space: nowrap;
+    }
+
+    body.theme-emre .btn-small {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-small.muted-music {
+      opacity: 0.58;
+    }
+
+    .btn-small:active {
+      transform: scale(0.97);
+    }
+
+    .garden-stage {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      background: var(--stage-bg);
+      border-radius: 24px;
+      border: 1px solid var(--stage-border);
+      padding: 10px 12px;
+    }
+
+    .stage-header {
+      text-align: center;
+      z-index: 2;
+      width: 100%;
+    }
+
+    .stage-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--gold);
+      margin: 0 0 2px;
+    }
+
+    .stage-sub {
+      font-size: 11.5px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .progress-wrap {
+      width: 100%;
+      max-width: 270px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      margin: 6px auto 2px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #4ade80, var(--accent-mid), var(--gold));
+      transition: width 0.35s ease;
+    }
+
+    .progress-label {
+      font-size: 11px;
+      color: var(--accent-soft);
+      font-weight: 600;
+    }
+
+    .visual-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 300px;
+      flex: 1;
+      min-height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 14px;
+      margin: 4px 0;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .peony-img {
+      max-width: 100%;
+      max-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 16px;
+      display: block;
+    }
+
+    .drop-overlay {
+      position: absolute;
+      top: 14%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-10px);
+      font-size: 26px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .drop-overlay.active {
+      animation: dropAnim 0.65s ease-in forwards;
+    }
+
+    @keyframes dropAnim {
+      0% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.8); }
+      25% { opacity: 1; }
+      100% { opacity: 0; transform: translateX(-50%) translateY(80px) scale(1.1); }
+    }
+
+    .action-area {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      z-index: 2;
+    }
+
+    .water-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-water {
+      flex: 1;
+      min-height: 44px;
+      border: none;
+      border-radius: 15px;
+      background: linear-gradient(135deg, #38bdf8, #2563eb);
+      color: #fff;
+      font-size: 14.5px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 22px rgba(56, 189, 248, 0.3);
+      touch-action: manipulation;
+    }
+
+    .btn-water:disabled {
+      opacity: 0.48;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-water:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    .quota-badge {
+      padding: 8px 10px;
+      border-radius: 13px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--accent-soft);
+      white-space: nowrap;
+    }
+
+    .msg-row {
+      display: flex;
+      gap: 7px;
+    }
+
+    .msg-row input {
+      flex: 1;
+      min-height: 38px;
+      padding: 8px 11px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(10, 7, 22, 0.78);
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    body.theme-emre .msg-row input {
+      background: rgba(8, 8, 10, 0.85);
+    }
+
+    .btn-msg {
+      min-height: 38px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: linear-gradient(135deg, var(--accent-mid), var(--accent-deep));
+      color: #fff;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    body.theme-emre .btn-msg {
+      background: linear-gradient(135deg, #3f3f46, #18181b);
+      color: #fafafa;
+    }
+
+    .log-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-radius: 20px;
+      padding: 8px 12px;
+      height: 22%;
+      min-height: 110px;
+      max-height: 155px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--accent-soft);
+      flex-shrink: 0;
+    }
+
+    .log-hint {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .log-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      padding-right: 2px;
+      touch-action: pan-y;
+    }
+
+    .log-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      font-size: 12px;
+    }
+
+    .log-item.flower-note {
+      background: rgba(255, 126, 179, 0.13);
+      border-color: var(--border);
+    }
+
+    body.theme-emre .log-item.flower-note {
+      background: rgba(255, 255, 255, 0.09);
+    }
+
+    .log-text {
+      color: var(--text);
+      font-weight: 600;
+      line-height: 1.28;
+      word-break: break-word;
+    }
+
+    .log-expire {
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .log-empty {
+      margin: auto;
+      font-size: 11.5px;
+      color: var(--muted);
+      text-align: center;
+      padding: 6px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(8, 5, 18, 0.9);
+      backdrop-filter: blur(14px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 380px;
+      background: var(--card-solid);
+      border: 1.5px solid var(--border);
+      border-radius: 24px;
+      padding: 20px;
+    }
+
+    .modal-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .modal-top h2 {
+      margin: 0;
+      font-size: 18px;
+      color: var(--gold);
+    }
+
+    .close-x {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      color: var(--accent-soft);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .name-choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .name-choice-btn {
+      min-height: 44px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .name-choice-btn.selected {
+      background: linear-gradient(135deg, var(--accent-mid), var(--accent-deep));
+      border-color: var(--gold);
+      color: #fff;
+    }
+
+    body.theme-emre .name-choice-btn.selected {
+      background: linear-gradient(135deg, #52525b, #18181b);
+      color: #fafafa;
+    }
+
+    .field input {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(9, 6, 20, 0.85);
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    body.theme-emre .field input {
+      background: rgba(6, 6, 8, 0.9);
+    }
+
+    .btn-save {
+      width: 100%;
+      min-height: 44px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent-mid), var(--accent-deep));
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    body.theme-emre .btn-save {
+      background: linear-gradient(135deg, #52525b, #18181b);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+    }
+
+    .confirm-message {
+      margin: 6px 0 16px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .confirm-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn-cancel {
+      min-height: 42px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-danger {
+      min-height: 42px;
+      border: none;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: #fff;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <div class="top-bar">
+      <div class="room-info">
+        <span class="pill">🌸 ÇİÇEK</span>
+        <span class="room-title" id="headerTitle">Aleyna · PEONY-2026</span>
+      </div>
+      <div class="top-actions">
+        <button type="button" class="btn-small" id="toggleMusicBtn" aria-label="Müzik">🎵</button>
+        <button type="button" class="btn-small" id="resetGardenBtn">Sıfırla</button>
+        <button type="button" class="btn-small" id="openRoomBtn">Kişi / Oda</button>
+      </div>
+    </div>
+
+    <div class="garden-stage">
+      <div class="stage-header">
+        <h1 class="stage-name" id="stageTitle">Sadece Toprak</h1>
+        <p class="stage-sub" id="stageDesc">Toprak henüz uyanıyor. Suladıkça 90 günde çiçek açacak.</p>
+        <div class="progress-wrap">
+          <div class="progress-fill" id="growthBar"></div>
+        </div>
+        <div class="progress-label" id="growthLabel">0. Gün · Büyüme %0 (Hedef 90 Gün)</div>
+      </div>
+
+      <div class="visual-wrap">
+        <img id="peonyImg" class="peony-img" src="https://raw.githubusercontent.com/emreakyavuz/sakayik-bahcesi/refs/heads/main/1.PNG" alt="Çiçek büyüme aşaması" />
+        <div class="drop-overlay" id="dropOverlay">💧</div>
+      </div>
+
+      <div class="action-area">
+        <div class="water-row">
+          <button type="button" class="btn-water" id="waterBtn">Çiçeği Sula 💧</button>
+          <span class="quota-badge" id="quotaBadge">Hak: 1/1</span>
+        </div>
+
+        <div class="msg-row">
+          <input type="text" id="flowerNoteInput" placeholder="Çiçeğe bir mesaj bırak..." />
+          <button type="button" class="btn-msg" id="sendFlowerNoteBtn">Not Bırak</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="log-panel">
+      <div class="log-header">
+        <span>📋 Sulama &amp; Çiçek Notları</span>
+        <span class="log-hint">3 günde bir otomatik silinir</span>
+      </div>
+      <div class="log-list" id="logList">
+        <div class="log-empty">Henüz sulama veya çiçek notu yok. 3 günde bir otomatik silinir.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kişi Seçimi ve Oda -->
+  <div class="modal-backdrop open" id="roomModal">
+    <div class="modal-card">
+      <div class="modal-top">
+        <h2>🌸 Aleynamın Çiçek Odası</h2>
+        <button type="button" class="close-x" id="closeRoomBtn" aria-label="Kapat">×</button>
+      </div>
+      <div class="field">
+        <label>Kimsin?</label>
+        <div class="name-choices">
+          <button type="button" class="name-choice-btn selected" data-person="Aleyna">Aleyna</button>
+          <button type="button" class="name-choice-btn" data-person="Emre">Emre</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Ortak Oda Kodu</label>
+        <input type="text" id="roomInput" value="PEONY-2026" style="text-transform:uppercase;" />
+      </div>
+      <button type="button" class="btn-save" id="saveRoomBtn">Bahçeye Gir</button>
+    </div>
+  </div>
+
+  <!-- İki Aşamalı Sıfırlama Onayı -->
+  <div class="modal-backdrop" id="confirmModal">
+    <div class="modal-card">
+      <div class="modal-top">
+        <h2 id="confirmTitle">🌱 Bahçeyi Sıfırla</h2>
+        <button type="button" class="close-x" id="closeConfirmBtn" aria-label="Kapat">×</button>
+      </div>
+      <p class="confirm-message" id="confirmText">Emin misin?</p>
+      <div class="confirm-actions">
+        <button type="button" class="btn-cancel" id="cancelConfirmBtn">Vazgeç</button>
+        <button type="button" class="btn-danger" id="acceptConfirmBtn">Evet</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+const FIREBASE_URL = "https://yildizz-5cf4f-default-rtdb.firebaseio.com";
+const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
+const FULL_BLOOM_DAYS = 90;
+const WATER_BONUS_DAYS = 0.5;
+const DAILY_WATER_LIMIT = 1;
+
+const RAW_BASE_URL = "https://raw.githubusercontent.com/emreakyavuz/sakayik-bahcesi/refs/heads/main";
+
+// Kişiye özel arka plan şarkısı bağlantıları
+const MUSIC_TRACKS = {
+  Aleyna: `${RAW_BASE_URL}/aleyna.mp3`,
+  Emre: `${RAW_BASE_URL}/emre.mp3`
+};
+
+const bgAudio = new Audio();
+bgAudio.loop = true;
+bgAudio.volume = 0.45;
+let musicMuted = false;
+let currentTrackUser = "";
+
+const PEONY_STAGES = [
+  { file: "1.PNG", title: "Sadece Toprak",      desc: "Toprak henüz uyanıyor. Suladıkça 90 günde çiçek açacak." },
+  { file: "2.PNG", title: "İlk Filiz",          desc: "Topraktan ilk taze çiçek filizi başını uzattı." },
+  { file: "3.PNG", title: "Taze Yapraklar",     desc: "İlk çiçek yaprakları açıldı, gövde filizleniyor." },
+  { file: "4.PNG", title: "Güçlenen Gövde",     desc: "Yapraklar gürleşiyor, çiçek gövdesi güçleniyor." },
+  { file: "5.PNG", title: "Tomurcuk Başlangıcı", desc: "çiçek tomurcuğu belirdi, açmaya hazırlanıyor." },
+  { file: "6.PNG", title: "Dolgun Tomurcuklar", desc: "Tomurcuklar dolgunlaştı, çiçekler açmak üzere." },
+  { file: "7.PNG", title: "Peonies Açtı!",      desc: "90 günlük emekle Peoniesler açtı!" }
+];
+
+const state = {
+  userName: "Aleyna",
+  pendingName: "Aleyna",
+  roomCode: "PEONY-2026",
+  plantedAt: null,
+  lastResetAt: 0,
+  waterLogs: [],
+  lastWateredAt: null,
+  resetStep: 0,
+  isResetting: false
+};
+
+// Dinamik PWA Manifest oluşturucu (Ana Ekrana Ekle / Widget deneyimi için)
+(function injectManifest() {
+  try {
+    const manifest = {
+      name: "Şakayık Bahçesi",
+      short_name: "Şakayık",
+      start_url: "./",
+      display: "standalone",
+      background_color: "#100b1f",
+      theme_color: "#100b1f",
+      icons: [
+        {
+          src: `${RAW_BASE_URL}/7.PNG`,
+          sizes: "512x512",
+          type: "image/png"
+        }
+      ]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("link");
+    link.rel = "manifest";
+    link.href = url;
+    document.head.appendChild(link);
+  } catch (e) {}
+})();
+
+function syncMusicButtonUI() {
+  const btn = document.getElementById("toggleMusicBtn");
+  if (!btn) return;
+  btn.textContent = musicMuted ? "🔇" : "🎵";
+  btn.classList.toggle("muted-music", musicMuted);
+}
+
+function playUserMusic(name, forceRestart = false) {
+  const normalized = (name || "").trim().toLowerCase() === "emre" ? "Emre" : "Aleyna";
+  const trackUrl = (MUSIC_TRACKS[normalized] || "").trim();
+
+  if (!trackUrl) {
+    bgAudio.pause();
+    bgAudio.removeAttribute("src");
+    currentTrackUser = normalized;
+    return;
+  }
+
+  if (forceRestart || currentTrackUser !== normalized || bgAudio.src !== trackUrl) {
+    bgAudio.pause();
+    bgAudio.src = trackUrl;
+    bgAudio.load();
+    currentTrackUser = normalized;
+  }
+
+  if (!musicMuted) {
+    bgAudio.play().catch(() => {});
+  }
+}
+
+document.getElementById("toggleMusicBtn").onclick = () => {
+  musicMuted = !musicMuted;
+  syncMusicButtonUI();
+  if (musicMuted) {
+    bgAudio.pause();
+  } else {
+    playUserMusic(state.userName, false);
+  }
+};
+
+document.addEventListener("pointerdown", () => {
+  if (!musicMuted && bgAudio.src && bgAudio.paused) {
+    bgAudio.play().catch(() => {});
+  }
+}, { once: true });
+
+let touchStartY = 0;
+window.addEventListener("touchstart", (e) => {
+  if (e.touches && e.touches.length === 1) {
+    touchStartY = e.touches[0].clientY;
+  }
+}, { passive: true });
+
+window.addEventListener("touchmove", (e) => {
+  if (e.target && e.target.closest && e.target.closest(".log-list")) return;
+  if (!e.touches || e.touches.length !== 1) return;
+  if (e.touches[0].clientY > touchStartY) {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+function applyThemeForUser(name) {
+  const isEmre = (name || "").trim().toLowerCase() === "emre";
+  document.body.classList.toggle("theme-emre", isEmre);
+}
+
+function syncNameButtonsUI() {
+  document.querySelectorAll(".name-choice-btn").forEach((btn) => {
+    btn.classList.toggle("selected", btn.dataset.person === state.pendingName);
+  });
+}
+
+function storageKey() {
+  return `peony_garden_${state.roomCode}`;
+}
+
+function dayKey(ts = Date.now()) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function pruneExpiredLogs(logs) {
+  const now = Date.now();
+  const minTs = state.lastResetAt || 0;
+  return (Array.isArray(logs) ? logs : [])
+    .filter((item) => {
+      if (!item || typeof item.expiresAt !== "number" || item.expiresAt <= now) return false;
+      if (minTs && typeof item.createdAt === "number" && item.createdAt < minTs) return false;
+      return true;
+    })
+    .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+function formatTimeHHMM(ts) {
+  const d = new Date(ts);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${hh}:${mm}`;
+}
+
+function formatRemainingThreeDays(expiresAt) {
+  const diff = Math.max(0, expiresAt - Date.now());
+  const hours = Math.floor(diff / (60 * 60 * 1000));
+  const days = Math.floor(hours / 24);
+  if (days >= 1) return `${days}g ${hours % 24}s sonra silinir`;
+  return `${Math.max(1, hours)}s sonra silinir`;
+}
+
+function getTodayWaterCountForUser(userName) {
+  const today = dayKey();
+  const norm = (userName || "").trim().toLowerCase();
+  return pruneExpiredLogs(state.waterLogs).filter((item) => {
+    const isWater = item.type === "water" || (!item.type && item.text && item.text.includes("Çiçeği Suladı"));
+    if (!isWater) return false;
+    if (dayKey(item.createdAt) !== today) return false;
+    return (item.by || "").trim().toLowerCase() === norm;
+  }).length;
+}
+
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(storageKey());
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (typeof data.lastResetAt === "number") state.lastResetAt = data.lastResetAt;
+    if (typeof data.plantedAt === "number") state.plantedAt = data.plantedAt;
+    if (typeof data.lastWateredAt === "number") state.lastWateredAt = data.lastWateredAt;
+    state.waterLogs = pruneExpiredLogs(data.waterLogs || []);
+  } catch (e) {}
+}
+
+function saveLocal() {
+  try {
+    localStorage.setItem(storageKey(), JSON.stringify({
+      plantedAt: state.plantedAt,
+      lastResetAt: state.lastResetAt,
+      lastWateredAt: state.lastWateredAt,
+      waterLogs: state.waterLogs
+    }));
+  } catch (e) {}
+}
+
+function computeGrowthProgress() {
+  const elapsedDays = state.plantedAt
+    ? Math.max(0, (Date.now() - state.plantedAt) / (24 * 60 * 60 * 1000))
+    : 0;
+
+  const waterCount = pruneExpiredLogs(state.waterLogs).filter(
+    (item) => item.type === "water" || (!item.type && item.text && item.text.includes("Çiçeği Suladı"))
+  ).length;
+
+  const careDays = waterCount * WATER_BONUS_DAYS;
+  const effectiveDays = Math.min(FULL_BLOOM_DAYS, elapsedDays + careDays);
+  const ratio = Math.max(0, Math.min(1, effectiveDays / FULL_BLOOM_DAYS));
+  const percent = Math.round(ratio * 100);
+
+  const stepIdx = Math.min(PEONY_STAGES.length - 1, Math.floor(ratio * PEONY_STAGES.length));
+  const stageObj = PEONY_STAGES[stepIdx] || PEONY_STAGES[0];
+
+  return {
+    daysElapsed: Math.floor(elapsedDays),
+    ratio,
+    percent,
+    stepIdx,
+    stageObj
+  };
+}
+
+function renderGarden() {
+  const g = computeGrowthProgress();
+  const titleEl = document.getElementById("stageTitle");
+  const descEl = document.getElementById("stageDesc");
+  const barEl = document.getElementById("growthBar");
+  const labelEl = document.getElementById("growthLabel");
+  const imgEl = document.getElementById("peonyImg");
+
+  titleEl.textContent = g.stageObj.title;
+  descEl.textContent = g.stageObj.desc;
+  barEl.style.width = `${g.percent}%`;
+  labelEl.textContent = `${g.daysElapsed}. Gün · Büyüme %${g.percent} (Hedef ${FULL_BLOOM_DAYS} Gün)`;
+
+  const targetSrc = `${RAW_BASE_URL}/${g.stageObj.file}`;
+  if (imgEl.getAttribute("src") !== targetSrc) {
+    imgEl.src = targetSrc;
+  }
+
+  const quotaEl = document.getElementById("quotaBadge");
+  const waterBtn = document.getElementById("waterBtn");
+  const usedToday = getTodayWaterCountForUser(state.userName);
+  const leftToday = Math.max(0, DAILY_WATER_LIMIT - usedToday);
+
+  quotaEl.textContent = `Hak: ${leftToday}/${DAILY_WATER_LIMIT}`;
+  waterBtn.disabled = leftToday <= 0;
+  waterBtn.textContent = leftToday > 0 ? "Çiçeği Sula 💧" : "Bugün Sulandı";
+}
+
+function renderLogs() {
+  state.waterLogs = pruneExpiredLogs(state.waterLogs);
+  saveLocal();
+
+  const listEl = document.getElementById("logList");
+  listEl.innerHTML = "";
+
+  if (state.waterLogs.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "log-empty";
+    empty.textContent = "Henüz sulama veya çiçek notu yok. 3 günde bir otomatik silinir.";
+    listEl.appendChild(empty);
+    return;
+  }
+
+  state.waterLogs.forEach((entry) => {
+    const row = document.createElement("div");
+    row.className = "log-item" + (entry.type === "note" ? " flower-note" : "");
+
+    const textSpan = document.createElement("span");
+    textSpan.className = "log-text";
+    textSpan.textContent = entry.text;
+
+    const expSpan = document.createElement("span");
+    expSpan.className = "log-expire";
+    expSpan.textContent = formatRemainingThreeDays(entry.expiresAt);
+
+    row.appendChild(textSpan);
+    row.appendChild(expSpan);
+    listEl.appendChild(row);
+  });
+}
+
+function triggerWaterDropAnim() {
+  const dropEl = document.getElementById("dropOverlay");
+  dropEl.classList.remove("active");
+  void dropEl.offsetWidth;
+  dropEl.classList.add("active");
+}
+
+async function deleteExpiredFromFirebase(room, logId) {
+  if (!FIREBASE_URL) return;
+  const base = FIREBASE_URL.replace(/\/+$/, "");
+  try {
+    await fetch(`${base}/rooms/${room}/flower/logs/${encodeURIComponent(logId)}.json`, {
+      method: "DELETE"
+    });
+  } catch (e) {}
+}
+
+async function resetFlowerInFirebase(room, freshTime) {
+  if (!FIREBASE_URL) return;
+  const base = FIREBASE_URL.replace(/\/+$/, "");
+  try {
+    await fetch(`${base}/rooms/${room}/flower.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        meta: {
+          plantedAt: freshTime,
+          lastResetAt: freshTime,
+          lastWateredAt: null,
+          updatedAt: freshTime
+        },
+        logs: null
+      })
+    });
+  } catch (e) {}
+}
+
+async function pushFlowerStateToFirebase(newLogItem = null) {
+  if (!FIREBASE_URL) return;
+  const base = FIREBASE_URL.replace(/\/+$/, "");
+  const room = encodeURIComponent(state.roomCode);
+
+  try {
+    await fetch(`${base}/rooms/${room}/flower/meta.json`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        plantedAt: state.plantedAt,
+        lastResetAt: state.lastResetAt || 0,
+        lastWateredAt: state.lastWateredAt,
+        updatedAt: Date.now()
+      })
+    });
+
+    if (newLogItem) {
+      await fetch(`${base}/rooms/${room}/flower/logs/${encodeURIComponent(newLogItem.id)}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newLogItem)
+      });
+    }
+  } catch (e) {}
+}
+
+async function pollFlowerFirebase() {
+  if (!FIREBASE_URL || state.isResetting) return;
+  const base = FIREBASE_URL.replace(/\/+$/, "");
+  const room = encodeURIComponent(state.roomCode);
+
+  try {
+    const res = await fetch(`${base}/rooms/${room}/flower.json`);
+    const data = await res.json();
+    if (state.isResetting) return;
+
+    if (!data) {
+      if (state.plantedAt) pushFlowerStateToFirebase(null);
+      return;
+    }
+
+    if (data.meta) {
+      if (typeof data.meta.lastResetAt === "number" && data.meta.lastResetAt > (state.lastResetAt || 0)) {
+        state.lastResetAt = data.meta.lastResetAt;
+        state.plantedAt = typeof data.meta.plantedAt === "number" ? data.meta.plantedAt : data.meta.lastResetAt;
+        state.lastWateredAt = null;
+        state.waterLogs = [];
+      } else if (typeof data.meta.plantedAt === "number") {
+        if (!state.plantedAt || data.meta.plantedAt > state.plantedAt) {
+          state.plantedAt = data.meta.plantedAt;
+        }
+        if (typeof data.meta.lastWateredAt === "number") {
+          state.lastWateredAt = Math.max(state.lastWateredAt || 0, data.meta.lastWateredAt);
+        }
+      }
+    }
+
+    if (data.logs && typeof data.logs === "object") {
+      const now = Date.now();
+      const minTs = state.lastResetAt || 0;
+      const cloudMap = new Map();
+
+      Object.entries(data.logs).forEach(([id, item]) => {
+        if (!item || typeof item.expiresAt !== "number" || item.expiresAt <= now) {
+          deleteExpiredFromFirebase(room, id);
+        } else if (minTs && typeof item.createdAt === "number" && item.createdAt < minTs) {
+          deleteExpiredFromFirebase(room, id);
+        } else {
+          cloudMap.set(id, { ...item, id: item.id || id });
+        }
+      });
+
+      pruneExpiredLogs(state.waterLogs).forEach((localItem) => {
+        if (!cloudMap.has(localItem.id)) {
+          cloudMap.set(localItem.id, localItem);
+        }
+      });
+
+      state.waterLogs = pruneExpiredLogs(Array.from(cloudMap.values()));
+    } else if (!minTsCheckEmpty(data.logs)) {
+      state.waterLogs = pruneExpiredLogs(state.waterLogs);
+    } else {
+      state.waterLogs = [];
+    }
+
+    renderGarden();
+    renderLogs();
+  } catch (e) {}
+}
+
+function minTsCheckEmpty(logsObj) {
+  return !logsObj || Object.keys(logsObj).length === 0;
+}
+
+document.getElementById("peonyImg").addEventListener("error", () => {
+  const descEl = document.getElementById("stageDesc");
+  descEl.textContent = "Görsel yüklenemedi; dosya adı büyük/küçük harf veya GitHub raw erişimi kontrol ediliyor.";
+});
+
+document.getElementById("waterBtn").onclick = async () => {
+  playUserMusic(state.userName, false);
+  const actor = state.userName;
+  if (getTodayWaterCountForUser(actor) >= DAILY_WATER_LIMIT) {
+    renderGarden();
+    return;
+  }
+
+  const now = Date.now();
+  if (!state.plantedAt) state.plantedAt = now;
+  state.lastWateredAt = now;
+
+  const timeStr = formatTimeHHMM(now);
+  const logItem = {
+    id: `w_${now}_${Math.random().toString(36).slice(2, 7)}`,
+    type: "water",
+    by: actor,
+    text: `💧 ${actor} Bugün ${timeStr} Çiçeği Suladı (+0.5 gün)`,
+    createdAt: now,
+    expiresAt: now + THREE_DAYS_MS
+  };
+
+  state.waterLogs = pruneExpiredLogs([logItem, ...state.waterLogs]);
+  saveLocal();
+  triggerWaterDropAnim();
+  renderGarden();
+  renderLogs();
+  await pushFlowerStateToFirebase(logItem);
+};
+
+document.getElementById("sendFlowerNoteBtn").onclick = async () => {
+  playUserMusic(state.userName, false);
+  const input = document.getElementById("flowerNoteInput");
+  const txt = input.value.trim();
+  if (!txt) return;
+
+  const actor = state.userName;
+  const now = Date.now();
+  if (!state.plantedAt) state.plantedAt = now;
+
+  const timeStr = formatTimeHHMM(now);
+  const noteItem = {
+    id: `n_${now}_${Math.random().toString(36).slice(2, 7)}`,
+    type: "note",
+    by: actor,
+    text: `🌸 ${actor} (${timeStr}): “${txt}”`,
+    createdAt: now,
+    expiresAt: now + THREE_DAYS_MS
+  };
+
+  state.waterLogs = pruneExpiredLogs([noteItem, ...state.waterLogs]);
+  input.value = "";
+  saveLocal();
+  renderGarden();
+  renderLogs();
+  await pushFlowerStateToFirebase(noteItem);
+};
+
+document.getElementById("flowerNoteInput").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    document.getElementById("sendFlowerNoteBtn").click();
+  }
+});
+
+const confirmModal = document.getElementById("confirmModal");
+const confirmTitle = document.getElementById("confirmTitle");
+const confirmText = document.getElementById("confirmText");
+const acceptConfirmBtn = document.getElementById("acceptConfirmBtn");
+const cancelConfirmBtn = document.getElementById("cancelConfirmBtn");
+const closeConfirmBtn = document.getElementById("closeConfirmBtn");
+
+function openResetStep(step) {
+  state.resetStep = step;
+  if (step === 1) {
+    confirmTitle.textContent = "🌱 Bahçeyi Sıfırla";
+    confirmText.textContent = "Emin misin?";
+    acceptConfirmBtn.textContent = "Evet";
+  } else if (step === 2) {
+    confirmTitle.textContent = "⚠️ Son Onay";
+    confirmText.textContent = "Baaak emin misin schatzz?";
+    acceptConfirmBtn.textContent = "Evet, Sıfırla";
+  }
+  confirmModal.classList.add("open");
+}
+
+function closeResetModal() {
+  state.resetStep = 0;
+  confirmModal.classList.remove("open");
+}
+
+document.getElementById("resetGardenBtn").onclick = () => {
+  openResetStep(1);
+};
+
+cancelConfirmBtn.onclick = closeResetModal;
+closeConfirmBtn.onclick = closeResetModal;
+
+acceptConfirmBtn.onclick = async () => {
+  if (state.resetStep === 1) {
+    openResetStep(2);
+    return;
+  }
+
+  if (state.resetStep === 2) {
+    closeResetModal();
+    state.isResetting = true;
+    const now = Date.now();
+    state.plantedAt = now;
+    state.lastResetAt = now;
+    state.lastWateredAt = null;
+    state.waterLogs = [];
+    saveLocal();
+    renderGarden();
+    renderLogs();
+    await resetFlowerInFirebase(encodeURIComponent(state.roomCode), now);
+    state.isResetting = false;
+  }
+};
+
+document.querySelectorAll(".name-choice-btn").forEach((btn) => {
+  btn.onclick = () => {
+    state.pendingName = btn.dataset.person === "Emre" ? "Emre" : "Aleyna";
+    syncNameButtonsUI();
+    applyThemeForUser(state.pendingName);
+    playUserMusic(state.pendingName, true);
+    renderGarden();
+  };
+});
+
+document.getElementById("openRoomBtn").onclick = () => {
+  state.pendingName = state.userName;
+  syncNameButtonsUI();
+  document.getElementById("roomInput").value = state.roomCode;
+  document.getElementById("roomModal").classList.add("open");
+};
+
+document.getElementById("closeRoomBtn").onclick = () => {
+  applyThemeForUser(state.userName);
+  playUserMusic(state.userName, false);
+  document.getElementById("roomModal").classList.remove("open");
+};
+
+document.getElementById("saveRoomBtn").onclick = () => {
+  const r = document.getElementById("roomInput").value.trim().toUpperCase();
+  state.userName = state.pendingName === "Emre" ? "Emre" : "Aleyna";
+  if (r) state.roomCode = r;
+
+  applyThemeForUser(state.userName);
+  playUserMusic(state.userName, true);
+  document.getElementById("headerTitle").textContent = `${state.userName} · ${state.roomCode}`;
+  document.getElementById("roomModal").classList.remove("open");
+
+  loadLocal();
+  if (!state.plantedAt) state.plantedAt = Date.now();
+  renderGarden();
+  renderLogs();
+  pollFlowerFirebase();
+};
+
+syncMusicButtonUI();
+applyThemeForUser(state.userName);
+syncNameButtonsUI();
+loadLocal();
+if (!state.plantedAt) state.plantedAt = Date.now();
+document.getElementById("headerTitle").textContent = `${state.userName} · ${state.roomCode}`;
+renderGarden();
+renderLogs();
+pollFlowerFirebase();
+
+setInterval(() => {
+  renderGarden();
+  renderLogs();
+}, 30000);
+
+setInterval(() => {
+  pollFlowerFirebase();
+}, 3000);
+</script>
+</body>
+</html>
